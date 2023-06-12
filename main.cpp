@@ -6,9 +6,15 @@ using namespace std;
 //weather api {https://openweathermap.org/forecast5}
 //1. 위도 경도  2. 도시 이름 3. 우편 번호
 
-int main() {
+//받아온 json 데이터를 가지고 정보를 출력해준다.
+void displayWeatherInfo(const string& weatherData){
+
+
+}
+
+string getWDataByCity(const string& apiKey, const string& city){
     CURL *curl = curl_easy_init();
-    string url = "https://api.openweathermap.org/data/2.5/weather?q=Seoul&appid=b1e668504d0535c4e1cc989cdcb31fa2";
+    string url = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&appid="+apiKey;
     string weatherData;
 
     if(curl){
@@ -29,6 +35,18 @@ int main() {
     }
 
 
-    cout << weatherData << endl;
+    return weatherData;
+}
+
+int main() {
+    string apiKey = "b1e668504d0535c4e1cc989cdcb31fa2";
+    string city;
+
+    cout << "도시 정보를 입력하세요: ";
+    getline(cin, city);
+
+    string weatherData = getWDataByCity(apiKey, city);
+
     return 0;
+
 }
