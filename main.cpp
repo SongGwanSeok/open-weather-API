@@ -41,7 +41,7 @@ string getWDataByLatLon(const string& apiKey){
 // city 정보로 weatherData 받아오는 함수
 string getWDataByCity(const string& apiKey){
     string city;
-    cout << "도시 정보를 입력하세요: ";
+    cout << "도시 이름을 영어로 입력하세요: ";
     getline(cin, city);
 
     CURL *curl = curl_easy_init();
@@ -69,15 +69,46 @@ string getWDataByCity(const string& apiKey){
     return weatherData;
 }
 
+// zipcode(우편 번호) 정보로 weatherData 받아오는 함수
+string getWDataByZipCode(const string& apiKey){
+    string zip;
+    cout << "우편 번호를 입력하세요: ";
+    getline(cin, zip);
+
+    CURL *curl = curl_easy_init();
+    string url = "https://api.openweathermap.org/data/2.5/weather?zip="+zip+"&appid="+apiKey;
+    string weatherData;
+
+    if(curl){
+        // URL
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+        // METHOD
+        // DEFAULT : GET
+
+        // EXECUTE
+        CURLcode res = curl_easy_perform(curl);
+
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            cout << "날씨 정보를 불러오는 도중에 문제 발생:" << curl_easy_strerror(res) << endl;
+        }
+    }
+
+    return weatherData;
+}
+
+
 int main() {
     string apiKey = "b1e668504d0535c4e1cc989cdcb31fa2";
     string weatherData;
-    int choice;
+    int choice, break_point=0;
 
     //1. 위도 경도  2. 도시 이름 3. 우편 번호
     while(true){
         cout << "어느 정보로 날씨를 검색 하시겠습니까?" << endl;
-        cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호" << endl;
+        cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호 4. 끝내기" << endl;
         cout << "해당하는 숫자를 입력하세요: ";
         cin >> choice;
         getchar();
@@ -89,8 +120,18 @@ int main() {
             case 2:
                 weatherData = getWDataByCity(apiKey);
                 break;
+            case 3:
+                weatherData = getWDataByZipCode(apiKey);
+                break;
+            case 4:
+                break_point=1;
+                break;
         }
-        cout << weatherData << endl;
+        if(break_point){
+            break;
+        }else{
+            cout << weatherData << endl;
+        }
     }
 
     return 0;
