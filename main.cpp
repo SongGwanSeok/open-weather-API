@@ -115,6 +115,13 @@ string getWDataByZipCode(const string& apiKey){
     return weatherData;
 }
 
+//Kelvin 온도를 Celsius 온도로 변환
+double KelvinToCelsius(double kel){
+    double cel;
+    cel = kel - 273.15;
+
+    return cel;
+}
 
 string displayWeatherInfo(const string& weatherData){
     // JSON 파싱
@@ -131,7 +138,7 @@ string displayWeatherInfo(const string& weatherData){
                 const Value& mainObj = data["main"];
                 if (mainObj.HasMember("temp") && mainObj["temp"].IsNumber()) {
                     double temperature = mainObj["temp"].GetDouble();
-                    std::cout << "온도: " << temperature << "°C" << std::endl;
+                    std::cout << "온도: " << KelvinToCelsius(temperature) << "°C" << std::endl;
                 }
 
                 if (mainObj.HasMember("humidity") && mainObj["humidity"].IsNumber()) {
