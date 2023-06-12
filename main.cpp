@@ -1,4 +1,104 @@
 #include <iostream>
+#include <curl/curl.h>
+
+using namespace std;
+
+//weather api {https://openweathermap.org/forecast5}
+//1. 위도 경도  2. 도시 이름 3. 우편 번호
+
+//latitude, longitude(위도, 경도)로 weatherData 받아오는 함수
+string getWDataByLatLon(const string& apiKey){
+    string lat, lon;
+    cout << "위도를 입력하세요: ";
+    getline(cin, lat);
+    cout << "경도를 입력하세요: ";
+    getline(cin, lon);
+
+    CURL *curl = curl_easy_init();
+    string url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&appid="+apiKey;
+    string weatherData;
+
+    if(curl){
+        // URL
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+        // METHOD
+        // DEFAULT : GET
+
+        // EXECUTE
+        CURLcode res = curl_easy_perform(curl);
+
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            cout << "날씨 정보를 불러오는 도중에 문제 발생:" << curl_easy_strerror(res) << endl;
+        }
+    }
+
+    return weatherData;
+}
+
+// city 정보로 weatherData 받아오는 함수
+string getWDataByCity(const string& apiKey){
+    string city;
+    cout << "도시 이름을 영어로 입력하세요: ";
+    getline(cin, city);
+
+    CURL *curl = curl_easy_init();
+    string url = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&appid="+apiKey;
+    string weatherData;
+
+    if(curl){
+        // URL
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+        // METHOD
+        // DEFAULT : GET
+
+        // EXECUTE
+        CURLcode res = curl_easy_perform(curl);
+
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            cout << "날씨 정보를 불러오는 도중에 문제 발생:" << curl_easy_strerror(res) << endl;
+        }
+    }
+
+
+    return weatherData;
+}
+
+// zipcode(우편 번호) 정보로 weatherData 받아오는 함수
+string getWDataByZipCode(const string& apiKey){
+    string zip;
+    cout << "우편 번호를 입력하세요: ";
+    getline(cin, zip);
+
+    CURL *curl = curl_easy_init();
+    string url = "https://api.openweathermap.org/data/2.5/weather?zip="+zip+"&appid="+apiKey;
+    string weatherData;
+
+    if(curl){
+        // URL
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+        // METHOD
+        // DEFAULT : GET
+
+        // EXECUTE
+        CURLcode res = curl_easy_perform(curl);
+
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            cout << "날씨 정보를 불러오는 도중에 문제 발생:" << curl_easy_strerror(res) << endl;
+        }
+    }
+
+    return weatherData;
+}
+
 
 #include <string>
 #include "rapidjson/document.h"
@@ -50,56 +150,39 @@ string displayWeatherInfo(const string& weatherData){
 }
 
 int main() {
-    std::cout << "20003204 송관석" << std::endl;
-    std::cout << "Hello, World!" << std::endl;
+    string apiKey = "b1e668504d0535c4e1cc989cdcb31fa2";
+    string weatherData;
+    int choice, break_point=0;
+
+    //1. 위도 경도  2. 도시 이름 3. 우편 번호
+    while(true){
+        cout << "어느 정보로 날씨를 검색 하시겠습니까?" << endl;
+        cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호 4. 끝내기" << endl;
+        cout << "해당하는 숫자를 입력하세요: ";
+        cin >> choice;
+        getchar();
+
+        switch (choice) {
+            case 1:
+                weatherData = getWDataByLatLon(apiKey);
+                break;
+            case 2:
+                weatherData = getWDataByCity(apiKey);
+                break;
+            case 3:
+                weatherData = getWDataByZipCode(apiKey);
+                break;
+            case 4:
+                break_point=1;
+                break;
+        }
+        if(break_point){
+            break;
+        }else{
+            cout << weatherData << endl;
+        }
+    }
+
     return 0;
+
 }
-
-
-//json data seoul
-//{
-//   "coord":{  경도와 위도 -> coord
-//      "lon":126.9778,
-//      "lat":37.5683
-//   },
-//   "weather":[  날씨 정보
-//      {
-//         "id":803,
-//         "main":"Clouds",
-//         "description":"broken clouds",
-//         "icon":"04d"
-//      }
-//   ],
-//   "base":"stations",
-//   "main":{
-//      "temp":299.81, // 온도
-//      "feels_like":299.81, // 체감온도
-//      "temp_min":295.84, // 최소 온도
-//      "temp_max":299.81, // 최대 온도
-//      "pressure":1010, // 대기압
-//      "humidity":42, // 습도
-//      "sea_level":1010, // 해수면
-//      "grnd_level":1003 // 지표면
-//   },
-//   "visibility":10000, // 가시성
-//   "wind":{ // 바람
-//      "speed":6.97, // 풍속
-//      "deg":261, // 풍향
-//      "gust":10.29 //돌풍
-//   },
-//   "clouds":{ //구름
-//      "all":74
-//   },
-//   "dt":1685948444,
-//   "sys":{
-//      "type":1,
-//      "id":5509,
-//      "country":"KR", // 도시 코드
-//      "sunrise":1685909496, // 일출 시간
-//      "sunset":1685962177 // 일몰 시간
-//   },
-//   "timezone":32400,
-//   "id":1835848,
-//   "name":"Seoul", // 도시 이름
-//   "cod":200
-//}
