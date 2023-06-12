@@ -1,10 +1,20 @@
 #include <iostream>
 #include <curl/curl.h>
+#include <string>
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
 
+using namespace rapidjson;
 using namespace std;
 
 //weather api {https://openweathermap.org/forecast5}
 //1. 위도 경도  2. 도시 이름 3. 우편 번호
+
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
+    size_t totalSize = size * nmemb;
+    output->append((char*)contents, totalSize);
+    return totalSize;
+}
 
 //latitude, longitude(위도, 경도)로 weatherData 받아오는 함수
 string getWDataByLatLon(const string& apiKey){
@@ -21,6 +31,8 @@ string getWDataByLatLon(const string& apiKey){
     if(curl){
         // URL
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &weatherData);
 
         // METHOD
         // DEFAULT : GET
@@ -51,6 +63,8 @@ string getWDataByCity(const string& apiKey){
     if(curl){
         // URL
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &weatherData);
 
         // METHOD
         // DEFAULT : GET
@@ -82,6 +96,8 @@ string getWDataByZipCode(const string& apiKey){
     if(curl){
         // URL
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &weatherData);
 
         // METHOD
         // DEFAULT : GET
@@ -100,15 +116,6 @@ string getWDataByZipCode(const string& apiKey){
 }
 
 
-#include <string>
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-
-using namespace rapidjson;
-
-using namespace std;
-
 string displayWeatherInfo(const string& weatherData){
     // JSON 파싱
     Document data;
@@ -120,7 +127,7 @@ string displayWeatherInfo(const string& weatherData){
                 string cityName = data["name"].GetString();
                 cout << "도시명: " << cityName << endl;
             }
-            if(data.HasMember("main") && data["main"].IsString()){
+            if(data.HasMember("main") && data["main"].IsObject()){
                 const Value& mainObj = data["main"];
                 if (mainObj.HasMember("temp") && mainObj["temp"].IsNumber()) {
                     double temperature = mainObj["temp"].GetDouble();
@@ -132,7 +139,7 @@ string displayWeatherInfo(const string& weatherData){
                     std::cout << "습도: " << humidity << "%" << std::endl;
                 }
             }
-            if(data.HasMember("wind") && data["wind"].IsString()){
+            if(data.HasMember("wind") && data["wind"].IsObject()){
                 const Value& windObj = data["wind"];
                 if (windObj.HasMember("speed") && windObj["speed"].IsNumber()) {
                     double windSpeed = windObj["speed"].GetDouble();
@@ -147,6 +154,7 @@ string displayWeatherInfo(const string& weatherData){
             std::cout << "날씨 데이터를 분석하는 동안 오류가 발생했습니다." << std::endl;
         }
     }
+    return weatherData;
 }
 
 int main() {
@@ -179,7 +187,7 @@ int main() {
         if(break_point){
             break;
         }else{
-            cout << weatherData << endl;
+            displayWeatherInfo(weatherData);
         }
     }
 
