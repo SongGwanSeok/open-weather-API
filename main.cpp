@@ -10,7 +10,17 @@ using namespace std;
 
 //weather api {https://openweathermap.org/forecast5}
 
-void displayAirPolution(const string &airPollution, string cityName);
+string getWeatherIcon(const string& weatherStatus);
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output);
+const Value& geocoding(string cityName);
+string getWDataByLatLon(const string& apiKey);
+string getWDataByCity(const string& apiKey);
+string getWDataByZipCode(const string& apiKey);
+void getFDataByCity(const string& apiKey);
+void getAirQuality(const string& apiKey);
+double KelvinToCelsius(double kel);
+void displayWeatherInfo(const string& weatherData);
+void displayAirPollution(const string &airPollution, string cityName);
 void displayWeatherForecast(const string& weatherData);
 
 //curl 사용 시에 나오는 json을 callback 시켜주는 함수
@@ -249,7 +259,7 @@ void getAirQuality(const string& apiKey) {
         }
     }
 
-    displayAirPolution(airPollution, city);
+    displayAirPollution(airPollution, city);
 
 }
 
@@ -371,7 +381,7 @@ void displayWeatherForecast(const string& weatherData) {
     }
 }
 
-void displayAirPolution(const string &airPollution, string cityName){
+void displayAirPollution(const string &airPollution, string cityName){
     // JSON 파싱
     Document data;
     data.Parse(airPollution.c_str());
