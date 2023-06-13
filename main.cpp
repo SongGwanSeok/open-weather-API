@@ -123,7 +123,7 @@ double KelvinToCelsius(double kel){
     return cel;
 }
 
-string displayWeatherInfo(const string& weatherData){
+void displayWeatherInfo(const string& weatherData){
     // JSON 파싱
     Document data;
     data.Parse(weatherData.c_str());
