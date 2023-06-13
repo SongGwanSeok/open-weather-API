@@ -3,6 +3,7 @@
 #include <string>
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
+#include <map>
 
 using namespace rapidjson;
 using namespace std;
@@ -10,11 +11,38 @@ using namespace std;
 //weather api {https://openweathermap.org/forecast5}
 //1. 위도 경도  2. 도시 이름 3. 우편 번호
 
-size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output) {
     size_t totalSize = size * nmemb;
     output->append((char*)contents, totalSize);
     return totalSize;
 }
+
+map<string, string> weatherIcons = {
+        {"Clear", "☀️"},
+        {"Clouds", "☁️"},
+        {"Rain", "🌧️"},
+        {"Drizzle", "🌦️"},
+        {"Thunderstorm", "⛈️"},
+        {"Snow", "❄️"},
+        {"Mist", "🌫️"},
+        {"Smoke", "🌫️"},
+        {"Haze", "🌫️"},
+        {"Dust", "🌫️"},
+        {"Fog", "🌫️"},
+        {"Sand", "🌫️"},
+        {"Ash", "🌫️"},
+        {"Squall", "🌫️"},
+        {"Tornado", "🌪️"},
+};
+
+// 날씨 상태에 해당하는 아이콘 반환
+string getWeatherIcon(const string& weatherStatus) {
+    if (weatherIcons.count(weatherStatus) > 0) {
+        return weatherIcons[weatherStatus];
+    }
+    return "";
+}
+
 
 //latitude, longitude(위도, 경도)로 weatherData 받아오는 함수
 string getWDataByLatLon(const string& apiKey){
@@ -135,33 +163,42 @@ string displayWeatherInfo(const string& weatherData){
                 cout << "도시명: " << cityName << endl;
             }
             if(data.HasMember("main") && data["main"].IsObject()){
-                const Value& mainObj = data["main"];
+                Value& mainObj = data["main"];
                 if (mainObj.HasMember("temp") && mainObj["temp"].IsNumber()) {
                     double temperature = mainObj["temp"].GetDouble();
-                    std::cout << "온도: " << KelvinToCelsius(temperature) << "°C" << std::endl;
+                    cout << "온도: " << KelvinToCelsius(temperature) << "°C" << endl;
                 }
 
                 if (mainObj.HasMember("humidity") && mainObj["humidity"].IsNumber()) {
                     int humidity = mainObj["humidity"].GetInt();
-                    std::cout << "습도: " << humidity << "%" << std::endl;
+                    cout << "습도: " << humidity << "%" << endl;
                 }
             }
             if(data.HasMember("wind") && data["wind"].IsObject()){
-                const Value& windObj = data["wind"];
+                Value& windObj = data["wind"];
                 if (windObj.HasMember("speed") && windObj["speed"].IsNumber()) {
                     double windSpeed = windObj["speed"].GetDouble();
-                    std::cout << "풍속: " << windSpeed << " m/s" << std::endl;
+                    cout << "풍속: " << windSpeed << " m/s" << endl;
                 }
             }
-            else {
-                std::cout << "잘못된 JSON 형식" << std::endl;
+            if(data.HasMember("weather") && data["weather"].IsArray()) {
+                Value &weatherArray = data["weather"];
+                if (!weatherArray.Empty()) {
+                    const Value &firstWeatherObject = weatherArray[0];
+                    if (firstWeatherObject.HasMember("main") && firstWeatherObject["main"].IsString()) {
+                        string weatherStatus = firstWeatherObject["main"].GetString();
+                        // 이제 mainValue 변수에 "main" 필드의 값이 저장됩니다.
+                        string weatherIcon = getWeatherIcon(weatherStatus);
+                        cout << "날씨 상태: " << weatherStatus << " " << weatherIcon << endl;
+                    }
+                }
             }
+        }else {
+            cout << "잘못된 JSON 형식" << endl;
         }
-        else {
-            std::cout << "날씨 데이터를 분석하는 동안 오류가 발생했습니다." << std::endl;
-        }
+    }else {
+        cout << "날씨 데이터를 분석하는 동안 오류가 발생했습니다." << endl;
     }
-    return weatherData;
 }
 
 int main() {
