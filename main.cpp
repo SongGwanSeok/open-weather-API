@@ -297,41 +297,50 @@ void getFDataByCity(const string& apiKey){
 int main() {
     string apiKey = "b1e668504d0535c4e1cc989cdcb31fa2";
     string weatherData;
-    int choice, break_point=0;
+    int choice, method, break_point=0;
 
     //1. 위도 경도  2. 도시 이름 3. 우편 번호
     while(true){
         int forecast=0;
         cout << "------------------------" << endl;
-        cout << "어느 정보로 날씨를 검색 하시겠습니까?" << endl;
-        cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호 4. 5일치 예보 확인 5. 끝내기" << endl;
+        cout << "어느 정보를 검색하시겠습니까?" << endl;
+        cout << "1. 현재 날씨 2. 일기 예보 3. 미세 먼지 4. 종료" << endl;
         cout << "해당하는 숫자를 입력하세요: ";
         cin >> choice;
         getchar();
 
         switch (choice) {
             case 1:
-                weatherData = getWDataByLatLon(apiKey);
+                cout << "검색 방식을 선택합니다." << endl;
+                cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호" << endl;
+                cin >> method;
+                getchar();
+                // 현재 날씨
+                switch (method) {
+                    case 1:
+                        weatherData = getWDataByLatLon(apiKey);
+                        break;
+                    case 2:
+                        weatherData = getWDataByCity(apiKey);
+                        break;
+                    case 3:
+                        weatherData = getWDataByZipCode(apiKey);
+                        break;
+                }
+                displayWeatherInfo(weatherData);
                 break;
             case 2:
-                weatherData = getWDataByCity(apiKey);
-                break;
-            case 3:
-                weatherData = getWDataByZipCode(apiKey);
-                break;
-            case 4:
-                forecast=1;
+                //일기 예보
                 getFDataByCity(apiKey);
                 break;
-            case 5:
+            case 3:
+                //미세 먼지
+                break;
+            case 4:
                 break_point=1;
                 break;
         }
-        if(break_point){
-            break;
-        }else if(forecast==0){
-            displayWeatherInfo(weatherData);
-        }
+        if(break_point) break;
     }
 
     return 0;
