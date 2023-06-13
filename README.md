@@ -85,8 +85,8 @@
 
 3. 미세먼지 : 도시 이름을 입력하면 현재 미세먼지 정보를 반환받는다.
   
-    <img width="523" alt="3" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/ecbd8b71-a2ab-4389-bb61-643384dc5fe8">
-
+    <img width="643" alt="스크린샷 2023-06-13 오후 10 17 56" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/d0d5c933-009c-4e7f-86c4-9399dd1e9405">
+  
 4. 종료 : 프로그램을 종료시킨다.
 
 
