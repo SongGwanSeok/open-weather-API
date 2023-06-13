@@ -241,7 +241,8 @@ void displayWeatherForecast(const string& weatherData) {
                                         if (firstWeatherObject.HasMember("main") && firstWeatherObject["main"].IsString()) {
                                             string weatherStatus = firstWeatherObject["main"].GetString();
                                             // 이제 mainValue 변수에 "main" 필드의 값이 저장됩니다.
-                                            cout << "날씨 상태: " << weatherStatus << endl;
+                                            string weatherIcon = getWeatherIcon(weatherStatus);
+                                            cout << "날씨 상태: " << weatherStatus << " " << weatherIcon << endl;
                                         }
                                     }
                                 }
@@ -300,6 +301,7 @@ int main() {
 
     //1. 위도 경도  2. 도시 이름 3. 우편 번호
     while(true){
+        int forecast=0;
         cout << "------------------------" << endl;
         cout << "어느 정보로 날씨를 검색 하시겠습니까?" << endl;
         cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호 4. 5일치 예보 확인 5. 끝내기" << endl;
@@ -318,6 +320,7 @@ int main() {
                 weatherData = getWDataByZipCode(apiKey);
                 break;
             case 4:
+                forecast=1;
                 getFDataByCity(apiKey);
                 break;
             case 5:
@@ -326,7 +329,7 @@ int main() {
         }
         if(break_point){
             break;
-        }else{
+        }else if(forecast==0){
             displayWeatherInfo(weatherData);
         }
     }
