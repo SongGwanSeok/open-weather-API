@@ -9,8 +9,11 @@ using namespace rapidjson;
 using namespace std;
 
 //weather api {https://openweathermap.org/forecast5}
-//1. 위도 경도  2. 도시 이름 3. 우편 번호
 
+void displayAirPolution(const string &airPollution, string cityName);
+
+
+//curl 사용 시에 나오는 json을 callback 시켜주는 함수
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output) {
     size_t totalSize = size * nmemb;
     output->append((char*)contents, totalSize);
@@ -41,6 +44,70 @@ string getWeatherIcon(const string& weatherStatus) {
         return weatherIcons[weatherStatus];
     }
     return "";
+}
+
+const Value& geocoding(string cityName){
+    //Mozilla5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+
+    // Nominatim API URL 생성
+    string apiUrl = "https://nominatim.openstreetmap.org/search?q=" + cityName + "&format=json&limit=1";
+
+    // HTTP 요청 초기화
+    CURL* curl = curl_easy_init();
+    if (curl){
+        // HTTP 요청 설정
+        curl_easy_setopt(curl, CURLOPT_URL, apiUrl.c_str());
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+        // User-Agent 설정
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+
+        // HTTP 요청 수행
+        string latlonjson;
+
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &latlonjson);
+        CURLcode result = curl_easy_perform(curl);
+
+        // HTTP 요청 결과 처리
+        if (result == CURLE_OK){
+            // JSON 데이터 파싱
+            Document document;
+            document.Parse(latlonjson.c_str());
+
+            // 결과 확인
+            if (!document.Empty()){
+                if (document.IsArray()){
+                    const Value& result = document[0];
+                    if (result.HasMember("lat") && result.HasMember("lon")){
+                        if (result.HasMember("licence") && result["licence"].IsString()) {
+                            const std::string& licence = result["licence"].GetString();
+                            cout << "------------------------" << endl;
+                            cout << "Licence: " << licence << endl;
+                        }
+                        return result;
+                    }
+                    else{
+                        cout << "도시의 위도와 경도를 찾을 수 없습니다." << endl;
+                    }
+                }
+                else{
+                    cout << "잘못된 JSON 형식 - 배열이 필요합니다." << endl;
+                }
+            }
+            else{
+                cout << "도시에 대한 검색 결과가 없습니다." << endl;
+            }
+        }
+        else{
+            cout << "HTTP 요청을 수행하지 못했습니다: " << curl_easy_strerror(result) << endl;
+        }
+        // CURL 자원 정리
+        curl_easy_cleanup(curl);
+    }
+    else{
+        cout << "CURL을 초기화하지 못했습니다." << endl;
+    }
 }
 
 
@@ -141,6 +208,48 @@ string getWDataByZipCode(const string& apiKey){
     }
 
     return weatherData;
+}
+
+//위도 경도 정보를 가지고 미세먼지 정보 확인
+void getAirQuality(const string& apiKey) {
+    CURL* curl;
+    string airPollution;
+    string city;
+    cout << "도시 이름을 영어로 입력하세요: ";
+    getline(cin, city);
+
+    const Value &latLonList = geocoding(city);
+    string lat = latLonList["lat"].GetString();
+    string lon = latLonList["lon"].GetString();
+
+    // OpenWeatherMap API 요청 URL (API 키를 포함해야 합니다)
+    string url = "http://api.openweathermap.org/data/2.5/air_pollution?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
+
+    // cURL 초기화
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+
+    if(curl){
+        // URL
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &airPollution);
+
+        // METHOD
+        // DEFAULT : GET
+
+        // EXECUTE
+        CURLcode res = curl_easy_perform(curl);
+
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            cout << "날씨 정보를 불러오는 도중에 문제 발생:" << curl_easy_strerror(res) << endl;
+        }
+    }
+
+    displayAirPolution(airPollution, city);
+
 }
 
 //Kelvin 온도를 Celsius 온도로 변환
@@ -261,6 +370,38 @@ void displayWeatherForecast(const string& weatherData) {
     }
 }
 
+void displayAirPolution(const string &airPollution, string cityName){
+    // JSON 파싱
+    Document data;
+    data.Parse(airPollution.c_str());
+
+    if(!data.HasParseError()) { // 파싱 오류 체크
+        if(data.IsObject()) { // JSON 문서가 객체 형식인지 확인
+            cout << "------------------------" << endl;
+            cout << "도시 이름: " << cityName << endl;
+            if(data.HasMember("list") && data["list"].IsArray()){
+                Value& airPollutionArray = data["list"];
+                if (!airPollutionArray.Empty()) {
+                    // 미세먼지 농도 추출
+                    const Value& airQuality = airPollutionArray[0]["components"];
+                    int pm25 = airQuality["pm2_5"].GetDouble();
+                    int pm10 = airQuality["pm10"].GetDouble();
+
+                    // 미세먼지 정보 출력
+                    cout << "PM2.5: " << pm25 << " μg/m^3" << endl;
+                    cout << "PM10: " << pm10 << " μg/m^3" << endl;
+                }
+            }
+        }
+        else {
+            cout << "잘못된 JSON 형식" << endl;
+        }
+    }
+    else {
+        std::cout << "미세먼지 데이터를 분석하는 동안 오류가 발생했습니다." << std::endl;
+    }
+
+}
 
 
 // city(도시 이름) 정보로 forecastData 받아오는 함수
@@ -301,7 +442,7 @@ int main() {
 
     //1. 위도 경도  2. 도시 이름 3. 우편 번호
     while(true){
-        int forecast=0;
+        int curWeather=1;
         cout << "------------------------" << endl;
         cout << "어느 정보를 검색하시겠습니까?" << endl;
         cout << "1. 현재 날씨 2. 일기 예보 3. 미세 먼지 4. 종료" << endl;
