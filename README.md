@@ -1,8 +1,7 @@
 # Open Weather API
 
 
-<img width="1440" alt="weather main" src="https://github.com/SongGwanSeok/Weather/assets/105411445/750dbb65-32bc-4f23-bc15-fc422488ce77">
-
+<img width="1425" alt="스크린샷 2023-06-13 오전 1 08 13" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/f2151e79-909e-43be-a11f-84eab85b8d39">
 
 <br/>
 
