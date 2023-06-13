@@ -9,8 +9,11 @@ using namespace rapidjson;
 using namespace std;
 
 //weather api {https://openweathermap.org/forecast5}
-//1. 위도 경도  2. 도시 이름 3. 우편 번호
 
+void displayAirPolution(const string& airPollution);
+
+
+//curl 사용 시에 나오는 json을 callback 시켜주는 함수
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output) {
     size_t totalSize = size * nmemb;
     output->append((char*)contents, totalSize);
@@ -143,6 +146,48 @@ string getWDataByZipCode(const string& apiKey){
     return weatherData;
 }
 
+//위도 경도 정보를 가지고 미세먼지 정보 확인
+void getAirQuality(const string& apiKey) {
+    CURL* curl;
+    string airPollution;
+
+    string lat, lon;
+    cout << "위도를 입력하세요: ";
+    getline(cin, lat);
+    cout << "경도를 입력하세요: ";
+    getline(cin, lon);
+
+
+    // OpenWeatherMap API 요청 URL (API 키를 포함해야 합니다)
+    string url = "http://api.openweathermap.org/data/2.5/air_pollution?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
+
+    // cURL 초기화
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+
+    if(curl){
+        // URL
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &airPollution);
+
+        // METHOD
+        // DEFAULT : GET
+
+        // EXECUTE
+        CURLcode res = curl_easy_perform(curl);
+
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            cout << "날씨 정보를 불러오는 도중에 문제 발생:" << curl_easy_strerror(res) << endl;
+        }
+    }
+
+    displayAirPolution(airPollution);
+
+}
+
 //Kelvin 온도를 Celsius 온도로 변환
 double KelvinToCelsius(double kel){
     double cel;
@@ -261,6 +306,37 @@ void displayWeatherForecast(const string& weatherData) {
     }
 }
 
+void displayAirPolution(const string& airPollution){
+    // JSON 파싱
+    Document data;
+    data.Parse(airPollution.c_str());
+
+    if(!data.HasParseError()) { // 파싱 오류 체크
+        if(data.IsObject()) { // JSON 문서가 객체 형식인지 확인
+            cout << "------------------------" << endl;
+            if(data.HasMember("list") && data["list"].IsArray()){
+                Value& airPollutionArray = data["list"];
+                if (!airPollutionArray.Empty()) {
+                    // 미세먼지 농도 추출
+                    const Value& airQuality = airPollutionArray[0]["components"];
+                    int pm25 = airQuality["pm2_5"].GetDouble();
+                    int pm10 = airQuality["pm10"].GetDouble();
+
+                    // 미세먼지 정보 출력
+                    cout << "PM2.5: " << pm25 << " μg/m^3" << endl;
+                    cout << "PM10: " << pm10 << " μg/m^3" << endl;
+                }
+            }
+        }
+        else {
+            cout << "잘못된 JSON 형식" << endl;
+        }
+    }
+    else {
+        std::cout << "미세먼지 데이터를 분석하는 동안 오류가 발생했습니다." << std::endl;
+    }
+
+}
 
 
 // city(도시 이름) 정보로 forecastData 받아오는 함수
@@ -301,10 +377,10 @@ int main() {
 
     //1. 위도 경도  2. 도시 이름 3. 우편 번호
     while(true){
-        int forecast=0;
+        int curWeather=1;
         cout << "------------------------" << endl;
         cout << "어느 정보로 날씨를 검색 하시겠습니까?" << endl;
-        cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호 4. 5일치 예보 확인 5. 끝내기" << endl;
+        cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호 4. 일기 예보(도시 이름) 5. 미세먼지 확인 6. 끝내기" << endl;
         cout << "해당하는 숫자를 입력하세요: ";
         cin >> choice;
         getchar();
@@ -320,16 +396,20 @@ int main() {
                 weatherData = getWDataByZipCode(apiKey);
                 break;
             case 4:
-                forecast=1;
+                curWeather=0;
                 getFDataByCity(apiKey);
                 break;
             case 5:
+                getAirQuality(apiKey);
+                curWeather=0;
+                break;
+            case 6:
                 break_point=1;
                 break;
         }
         if(break_point){
             break;
-        }else if(forecast==0){
+        }else if(curWeather==1){
             displayWeatherInfo(weatherData);
         }
     }
