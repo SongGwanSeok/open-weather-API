@@ -68,25 +68,25 @@
 
     a. 위도, 경도 : 위도, 경도 정보를 입력하면 현재 날씨 정보를 반환받는다.
     
-    <img width="523" alt="1-1" src="https://github.com/SongGwanSeok/Weather/assets/105411445/9f5f4d02-fb07-42bb-8283-d1a438ce6497">
+    <img width="523" alt="1-1" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/809e882f-dcfe-45e1-89c2-820fe481fc5e">
     
     b. 도시 이름 : 도시 이름을 입력하면 현재 날씨 정보를 반환받는다.
     
-    <img width="523" alt="1-2" src="https://github.com/SongGwanSeok/Weather/assets/105411445/fca097eb-0599-434c-ba20-2352dbf69fc8">
+    <img width="523" alt="1-2" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/d2d81571-213c-41dc-aa11-5f65a343038a">
 
     c. 우편 번호 : 우편 번호를 입력하면 현재 날씨 정보를 반환받는다.
     
-    <img width="523" alt="1-3" src="https://github.com/SongGwanSeok/Weather/assets/105411445/5c67e98e-db5b-4ab7-a5b8-882b5e8ab0fc">
+    <img width="523" alt="1-3" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/6e2db91c-d8b9-4f7e-9928-8e1424756bbc">
 
 2. 5일치 일기 예보 : 도시 이름을 입력하면 5일치 일기 예보를 반환받는다.
 
-    <img width="523" alt="2-1" src="https://github.com/SongGwanSeok/Weather/assets/105411445/158205bb-097f-4a38-9778-ebfcf4f54179">
+    <img width="523" alt="2-1" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/07a1de46-e253-473e-b615-97abc700a1fd">
     
-    <img width="523" alt="2-2" src="https://github.com/SongGwanSeok/Weather/assets/105411445/bc48bb8b-7f86-4aa8-9ff8-c067f171f76f">
+    <img width="523" alt="2-2" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/d720b5b2-8608-4744-8067-fb82565701c4">
 
 3. 미세먼지 : 도시 이름을 입력하면 현재 미세먼지 정보를 반환받는다.
-
-    <img width="523" alt="3" src="https://github.com/SongGwanSeok/Weather/assets/105411445/e55292ba-aaac-4ce0-aaed-cc5e4b8a5c09">
+  
+    <img width="523" alt="3" src="https://github.com/SongGwanSeok/open-weather-API/assets/105411445/ecbd8b71-a2ab-4389-bb61-643384dc5fe8">
 
 4. 종료 : 프로그램을 종료시킨다.
 
