@@ -46,6 +46,68 @@ string getWeatherIcon(const string& weatherStatus) {
     return "";
 }
 
+const Value& geocoding(string cityName){
+    //Mozilla5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+
+    // Nominatim API URL 생성
+    string apiUrl = "https://nominatim.openstreetmap.org/search?q=" + cityName + "&format=json&limit=1";
+
+    // HTTP 요청 초기화
+    CURL* curl = curl_easy_init();
+    if (curl){
+        // HTTP 요청 설정
+        curl_easy_setopt(curl, CURLOPT_URL, apiUrl.c_str());
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+        // User-Agent 설정
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+
+        // HTTP 요청 수행
+        string latlonjson;
+
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &latlonjson);
+        CURLcode result = curl_easy_perform(curl);
+
+        // HTTP 요청 결과 처리
+        if (result == CURLE_OK){
+            // JSON 데이터 파싱
+            Document document;
+            document.Parse(latlonjson.c_str());
+
+            cout << latlonjson << endl;
+
+            // 결과 확인
+            if (!document.Empty()){
+                if (document.IsArray()){
+                    const Value& result = document[0];
+                    if (result.HasMember("lat") && result.HasMember("lon")){
+                        return result;
+                    }
+                    else{
+                        cout << "도시의 위도와 경도를 찾을 수 없습니다." << endl;
+                    }
+                }
+                else{
+                    cout << "잘못된 JSON 형식 - 배열이 필요합니다." << endl;
+                }
+            }
+            else{
+                cout << "도시에 대한 검색 결과가 없습니다." << endl;
+            }
+        }
+        else{
+            cout << "HTTP 요청을 수행하지 못했습니다: " << curl_easy_strerror(result) << endl;
+        }
+        // CURL 자원 정리
+        curl_easy_cleanup(curl);
+    }
+    else
+    {
+        cout << "CURL을 초기화하지 못했습니다." << endl;
+    }
+}
+
 
 //latitude, longitude(위도, 경도)로 weatherData 받아오는 함수
 string getWDataByLatLon(const string& apiKey){
