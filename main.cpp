@@ -119,6 +119,9 @@ const Value& geocoding(string cityName){
     else{
         cout << "CURL을 초기화하지 못했습니다." << endl;
     }
+    // 반환되는 값이 없는 경우에 대한 처리
+    static Value emptyResult;
+    return emptyResult;
 }
 
 
