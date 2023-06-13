@@ -10,7 +10,7 @@ using namespace std;
 
 //weather api {https://openweathermap.org/forecast5}
 
-void displayAirPolution(const string& airPollution);
+void displayAirPolution(const string &airPollution, string cityName);
 
 
 //curl 사용 시에 나오는 json을 callback 시켜주는 함수
@@ -75,13 +75,16 @@ const Value& geocoding(string cityName){
             Document document;
             document.Parse(latlonjson.c_str());
 
-            cout << latlonjson << endl;
-
             // 결과 확인
             if (!document.Empty()){
                 if (document.IsArray()){
                     const Value& result = document[0];
                     if (result.HasMember("lat") && result.HasMember("lon")){
+                        if (result.HasMember("licence") && result["licence"].IsString()) {
+                            const std::string& licence = result["licence"].GetString();
+                            cout << "------------------------" << endl;
+                            cout << "Licence: " << licence << endl;
+                        }
                         return result;
                     }
                     else{
@@ -102,8 +105,7 @@ const Value& geocoding(string cityName){
         // CURL 자원 정리
         curl_easy_cleanup(curl);
     }
-    else
-    {
+    else{
         cout << "CURL을 초기화하지 못했습니다." << endl;
     }
 }
@@ -212,13 +214,13 @@ string getWDataByZipCode(const string& apiKey){
 void getAirQuality(const string& apiKey) {
     CURL* curl;
     string airPollution;
+    string city;
+    cout << "도시 이름을 영어로 입력하세요: ";
+    getline(cin, city);
 
-    string lat, lon;
-    cout << "위도를 입력하세요: ";
-    getline(cin, lat);
-    cout << "경도를 입력하세요: ";
-    getline(cin, lon);
-
+    const Value &latLonList = geocoding(city);
+    string lat = latLonList["lat"].GetString();
+    string lon = latLonList["lon"].GetString();
 
     // OpenWeatherMap API 요청 URL (API 키를 포함해야 합니다)
     string url = "http://api.openweathermap.org/data/2.5/air_pollution?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
@@ -246,7 +248,7 @@ void getAirQuality(const string& apiKey) {
         }
     }
 
-    displayAirPolution(airPollution);
+    displayAirPolution(airPollution, city);
 
 }
 
@@ -368,7 +370,7 @@ void displayWeatherForecast(const string& weatherData) {
     }
 }
 
-void displayAirPolution(const string& airPollution){
+void displayAirPolution(const string &airPollution, string cityName){
     // JSON 파싱
     Document data;
     data.Parse(airPollution.c_str());
@@ -376,6 +378,7 @@ void displayAirPolution(const string& airPollution){
     if(!data.HasParseError()) { // 파싱 오류 체크
         if(data.IsObject()) { // JSON 문서가 객체 형식인지 확인
             cout << "------------------------" << endl;
+            cout << "도시 이름: " << cityName << endl;
             if(data.HasMember("list") && data["list"].IsArray()){
                 Value& airPollutionArray = data["list"];
                 if (!airPollutionArray.Empty()) {
