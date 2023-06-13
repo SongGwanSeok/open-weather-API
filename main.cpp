@@ -21,7 +21,7 @@ void getAirQuality(const string& apiKey);
 double KelvinToCelsius(double kel);
 void displayWeatherInfo(const string& weatherData);
 void displayAirPollution(const string &airPollution, string cityName);
-
+void displayWeatherForecast(const string& weatherData);
 
 //curl 사용 시에 나오는 json을 callback 시켜주는 함수
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output) {
@@ -30,26 +30,27 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output) 
     return totalSize;
 }
 
-map<string, string> weatherIcons = {
-        {"Clear", "☀️"},
-        {"Clouds", "☁️"},
-        {"Rain", "🌧️"},
-        {"Drizzle", "🌦️"},
-        {"Thunderstorm", "⛈️"},
-        {"Snow", "❄️"},
-        {"Mist", "🌫️"},
-        {"Smoke", "🌫️"},
-        {"Haze", "🌫️"},
-        {"Dust", "🌫️"},
-        {"Fog", "🌫️"},
-        {"Sand", "🌫️"},
-        {"Ash", "🌫️"},
-        {"Squall", "🌫️"},
-        {"Tornado", "🌪️"},
-};
-
 // 날씨 상태에 해당하는 아이콘 반환
 string getWeatherIcon(const string& weatherStatus) {
+
+    map<string, string> weatherIcons;
+    weatherIcons.insert(make_pair("Clear", "☀️"));
+    weatherIcons.insert(make_pair("Clouds", "☁️"));
+    weatherIcons.insert(make_pair("Rain", "🌧️"));
+    weatherIcons.insert(make_pair("Drizzle", "🌦️"));
+    weatherIcons.insert(make_pair("Snow", "❄️"));
+    weatherIcons.insert(make_pair("Thunderstorm", "⛈️"));
+    weatherIcons.insert(make_pair("Mist", "🌫️"));
+    weatherIcons.insert(make_pair("Smoke", "🌫️"));
+    weatherIcons.insert(make_pair("Haze", "🌫️"));
+    weatherIcons.insert(make_pair("Dust", "🌫️"));
+    weatherIcons.insert(make_pair("Fog", "🌫️"));
+    weatherIcons.insert(make_pair("Sand", "🌫️"));
+    weatherIcons.insert(make_pair("Ash", "🌫️"));
+    weatherIcons.insert(make_pair("Squall", "🌫️"));
+    weatherIcons.insert(make_pair("Tornado", "🌪️"));
+
+
     if (weatherIcons.count(weatherStatus) > 0) {
         return weatherIcons[weatherStatus];
     }
@@ -398,8 +399,8 @@ void displayAirPollution(const string &airPollution, string cityName){
                     int pm10 = airQuality["pm10"].GetDouble();
 
                     // 미세먼지 정보 출력
-                    cout << "PM2.5: " << pm25 << " μg/m^3" << endl;
-                    cout << "PM10: " << pm10 << " μg/m^3" << endl;
+                    cout << "미세먼지 : " << pm10 << " μg/m^3" << endl;
+                    cout << "초미세먼지 : " << pm25 << " μg/m^3" << endl;
                 }
             }
         }
@@ -462,8 +463,10 @@ int main() {
 
         switch (choice) {
             case 1:
+                cout << "------------------------" << endl;
                 cout << "검색 방식을 선택합니다." << endl;
                 cout << "1. 위도 경도  2. 도시 이름  3. 우편 번호" << endl;
+                cout << "해당하는 숫자를 입력하세요 : ";
                 cin >> method;
                 getchar();
                 // 현재 날씨
@@ -486,6 +489,7 @@ int main() {
                 break;
             case 3:
                 //미세 먼지
+                getAirQuality(apiKey);
                 break;
             case 4:
                 break_point=1;
