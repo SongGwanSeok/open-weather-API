@@ -91,5 +91,20 @@
 
 
 ## 
+
+License
+=======
+
+This project is licensed under the MIT license.
+Please see the [LICENSE file](https://github.com/Cmfcmf/OpenWeatherMap-PHP-Api/blob/master/LICENSE)
+distributed with this source code for further information regarding copyright and licensing.
+
+Be aware that the OpenWeatherMap data is **not licensed under the MIT**.
+**Check out the following official links to read about the terms, pricing and license of OpenWeatherMap before using their service:**
+
+- [OpenWeatherMap.org/terms](http://OpenWeatherMap.org/terms)
+- [OpenWeatherMap.org/appid](http://OpenWeatherMap.org/appid)
+
+
     
 
